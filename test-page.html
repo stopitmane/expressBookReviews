@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express Book Reviews API Tester</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .task { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .task h3 { color: #333; margin-top: 0; }
+        button { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 3px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px; white-space: pre-wrap; font-family: monospace; }
+        input, textarea { width: 300px; padding: 5px; margin: 5px; }
+        .auth-section { background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Express Book Reviews API Tester</h1>
+    <p><strong>Server URL:</strong> http://localhost:5001</p>
+
+    <!-- Task 1 -->
+    <div class="task">
+        <h3>Task 1: Get All Books</h3>
+        <button onclick="testTask1()">GET /</button>
+        <div id="result1" class="result"></div>
+    </div>
+
+    <!-- Task 2 -->
+    <div class="task">
+        <h3>Task 2: Get Book by ISBN</h3>
+        <input type="text" id="isbn2" value="9780143126560" placeholder="ISBN">
+        <button onclick="testTask2()">GET /isbn/:isbn</button>
+        <div id="result2" class="result"></div>
+    </div>
+
+    <!-- Task 3 -->
+    <div class="task">
+        <h3>Task 3: Get Books by Author</h3>
+        <input type="text" id="author3" value="Andy Weir" placeholder="Author Name">
+        <button onclick="testTask3()">GET /author/:author</button>
+        <div id="result3" class="result"></div>
+    </div>
+
+    <!-- Task 4 -->
+    <div class="task">
+        <h3>Task 4: Get Books by Title</h3>
+        <input type="text" id="title4" value="The Martian" placeholder="Book Title">
+        <button onclick="testTask4()">GET /title/:title</button>
+        <div id="result4" class="result"></div>
+    </div>
+
+    <!-- Task 5 -->
+    <div class="task">
+        <h3>Task 5: Get Book Reviews</h3>
+        <input type="text" id="isbn5" value="9780143126560" placeholder="ISBN">
+        <button onclick="testTask5()">GET /review/:isbn</button>
+        <div id="result5" class="result"></div>
+    </div>
+
+    <!-- Task 6 -->
+    <div class="task">
+        <h3>Task 6: Register User</h3>
+        <input type="text" id="username6" value="testuser" placeholder="Username">
+        <input type="password" id="password6" value="testpass" placeholder="Password">
+        <button onclick="testTask6()">POST /customer/register</button>
+        <div id="result6" class="result"></div>
+    </div>
+
+    <!-- Task 7 -->
+    <div class="task">
+        <h3>Task 7: Login User</h3>
+        <input type="text" id="username7" value="testuser" placeholder="Username">
+        <input type="password" id="password7" value="testpass" placeholder="Password">
+        <button onclick="testTask7()">POST /customer/login</button>
+        <div id="result7" class="result"></div>
+        <div class="auth-section">
+            <strong>Session Token:</strong> <span id="sessionToken">Not logged in</span>
+        </div>
+    </div>
+
+    <!-- Task 8 -->
+    <div class="task">
+        <h3>Task 8: Add Review (Requires Login)</h3>
+        <input type="text" id="isbn8" value="9780143126560" placeholder="ISBN">
+        <input type="text" id="review8" value="Great book about survival!" placeholder="Review Text">
+        <button onclick="testTask8()">PUT /customer/auth/review/:isbn</button>
+        <div id="result8" class="result"></div>
+    </div>
+
+    <!-- Task 9 -->
+    <div class="task">
+        <h3>Task 9: Delete Review (Requires Login)</h3>
+        <input type="text" id="isbn9" value="9780143126560" placeholder="ISBN">
+        <button onclick="testTask9()">DELETE /customer/auth/review/:isbn</button>
+        <div id="result9" class="result"></div>
+    </div>
+
+    <!-- Async Tasks -->
+    <div class="task">
+        <h3>Task 10: Async Get All Books</h3>
+        <button onclick="testTask10()">GET /async/books</button>
+        <div id="result10" class="result"></div>
+    </div>
+
+    <div class="task">
+        <h3>Task 11: Async Get Book by ISBN</h3>
+        <input type="text" id="isbn11" value="9780143126560" placeholder="ISBN">
+        <button onclick="testTask11()">GET /async/isbn/:isbn</button>
+        <div id="result11" class="result"></div>
+    </div>
+
+    <div class="task">
+        <h3>Task 12: Async Get Books by Author</h3>
+        <input type="text" id="author12" value="Andy Weir" placeholder="Author Name">
+        <button onclick="testTask12()">GET /async/author/:author</button>
+        <div id="result12" class="result"></div>
+    </div>
+
+    <div class="task">
+        <h3>Task 13: Async Get Books by Title</h3>
+        <input type="text" id="title13" value="The Martian" placeholder="Book Title">
+        <button onclick="testTask13()">GET /async/title/:title</button>
+        <div id="result13" class="result"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:5001';
+        let sessionToken = '';
+
+        async function makeRequest(url, method = 'GET', body = null, useAuth = false) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            if (useAuth && sessionToken) {
+                options.credentials = 'include';
+            }
+
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                return {
+                    status: response.status,
+                    data: data
+                };
+            } catch (error) {
+                return {
+                    status: 'Error',
+                    data: { message: error.message }
+                };
+            }
+        }
+
+        function displayResult(elementId, result) {
+            document.getElementById(elementId).textContent = 
+                `Status: ${result.status}\n\n${JSON.stringify(result.data, null, 2)}`;
+        }
+
+        // Task functions
+        async function testTask1() {
+            const result = await makeRequest(`${BASE_URL}/`);
+            displayResult('result1', result);
+        }
+
+        async function testTask2() {
+            const isbn = document.getElementById('isbn2').value;
+            const result = await makeRequest(`${BASE_URL}/isbn/${isbn}`);
+            displayResult('result2', result);
+        }
+
+        async function testTask3() {
+            const author = document.getElementById('author3').value;
+            const result = await makeRequest(`${BASE_URL}/author/${encodeURIComponent(author)}`);
+            displayResult('result3', result);
+        }
+
+        async function testTask4() {
+            const title = document.getElementById('title4').value;
+            const result = await makeRequest(`${BASE_URL}/title/${encodeURIComponent(title)}`);
+            displayResult('result4', result);
+        }
+
+        async function testTask5() {
+            const isbn = document.getElementById('isbn5').value;
+            const result = await makeRequest(`${BASE_URL}/review/${isbn}`);
+            displayResult('result5', result);
+        }
+
+        async function testTask6() {
+            const username = document.getElementById('username6').value;
+            const password = document.getElementById('password6').value;
+            const result = await makeRequest(`${BASE_URL}/customer/register`, 'POST', { username, password });
+            displayResult('result6', result);
+        }
+
+        async function testTask7() {
+            const username = document.getElementById('username7').value;
+            const password = document.getElementById('password7').value;
+            const result = await makeRequest(`${BASE_URL}/customer/login`, 'POST', { username, password });
+            displayResult('result7', result);
+            
+            if (result.status === 200 && result.data.token) {
+                sessionToken = result.data.token;
+                document.getElementById('sessionToken').textContent = sessionToken.substring(0, 50) + '...';
+            }
+        }
+
+        async function testTask8() {
+            const isbn = document.getElementById('isbn8').value;
+            const review = document.getElementById('review8').value;
+            const result = await makeRequest(`${BASE_URL}/customer/auth/review/${isbn}?review=${encodeURIComponent(review)}`, 'PUT', null, true);
+            displayResult('result8', result);
+        }
+
+        async function testTask9() {
+            const isbn = document.getElementById('isbn9').value;
+            const result = await makeRequest(`${BASE_URL}/customer/auth/review/${isbn}`, 'DELETE', null, true);
+            displayResult('result9', result);
+        }
+
+        async function testTask10() {
+            const result = await makeRequest(`${BASE_URL}/async/books`);
+            displayResult('result10', result);
+        }
+
+        async function testTask11() {
+            const isbn = document.getElementById('isbn11').value;
+            const result = await makeRequest(`${BASE_URL}/async/isbn/${isbn}`);
+            displayResult('result11', result);
+        }
+
+        async function testTask12() {
+            const author = document.getElementById('author12').value;
+            const result = await makeRequest(`${BASE_URL}/async/author/${encodeURIComponent(author)}`);
+            displayResult('result12', result);
+        }
+
+        async function testTask13() {
+            const title = document.getElementById('title13').value;
+            const result = await makeRequest(`${BASE_URL}/async/title/${encodeURIComponent(title)}`);
+            displayResult('result13', result);
+        }
+    </script>
+</body>
+</html>
