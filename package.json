@@ -1,0 +1,29 @@
+{
+  "name": "express-book-reviews",
+  "version": "1.0.1",
+  "description": "REST API for book reviews with JWT authentication",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --forceExit",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "Ajayi Taiwo John",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.12.2",
+    "express": "^4.18.1",
+    "express-session": "^1.17.3",
+    "jsonwebtoken": "^8.5.1",
+    "nodemon": "^2.0.19"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "forceExit": true,
+    "testTimeout": 10000
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2"
+  }
+}
